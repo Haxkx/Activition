@@ -3,7 +3,7 @@
         "device_id": "dcadf9318b87960e",
         "key": "monir123",
         "expirydate": "20-12-2025",
-        "Allowoffline": false
+        "Allowoffline": true
     },
     {
         "device_id": "device456",
