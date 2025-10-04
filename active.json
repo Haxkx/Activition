@@ -1,14 +1,16 @@
-{
-  "id": "aa7743460bca4837",
-  "username": "H4CKER",
-  "password": "H4CKER",
-  "expiresAt": "2025-12-31",
-  "allowOffline": true
-},
-{
-  "id": "xxxaa7743460bca4837",
-  "username": "HXCKER",
-  "password": "HXCKER",
-  "expiresAt": "2025-12-31",
-  "allowOffline": false
-},
+[
+  {
+    "id": "6d95fa17c7e40bea",
+    "username": "dpmods", 
+    "password": "dpmods",
+    "expiresAt": "2025-12-31",
+    "allowOffline": true
+  },
+  {
+    "id": "aa7743460bca4837",
+    "username": "H4CKER",
+    "password": "H4CKER", 
+    "expiresAt": "2025-11-30",
+    "allowOffline": false
+  }
+]
