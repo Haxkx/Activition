@@ -1,32 +1,14 @@
-[
-    {
-        "device_id": "dcadf9318b87960e",
-        "key": "monir123",
-        "expirydate": "20-12-2025",
-        "Allowoffline": false
-    },
-    {
-        "device_id": "xxxf86f9203660ee219",
-        "key": "xxxShuvo23",
-        "expirydate": "05-10-2025",
-        "Allowoffline": false
-    },
-    {
-        "device_id": "xxxx6099bb8db190b708",
-        "key": "xxxJisan550",
-        "expirydate": "04-10-2025",
-        "Allowoffline": false
-    },
-    {
-        "device_id": "xxxaa7743460bca4837",
-        "key": "H4CKER",
-        "expirydate": "20-12-2025",
-        "Allowoffline": false
-    },
-    {
-        "device_id": "device456",
-        "key": "key67890",
-        "expirydate": "15-06-2025",
-        "Allowoffline": false
-    }
-]
+{
+  "id": "6d95fa17c7e40bea",
+  "username": "H4CKER",
+  "password": "H4CKER",
+  "expiresAt": "2025-12-31",
+  "allowOffline": true
+},
+{
+  "id": "6d95fa17c7e40bea",
+  "username": "H4CKER",
+  "password": "H4CKER",
+  "expiresAt": "2025-12-31",
+  "allowOffline": false
+},
