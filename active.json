@@ -7,6 +7,13 @@
     "allowOffline": true
   },
   {
+    "id": "de4698d6573d0729",
+    "username": "Trader",
+    "password": "Sojib@1133", 
+    "expiresAt": "2025-10-07",
+    "allowOffline": false
+  }
+  {
     "id": "aa7743460bca4837",
     "username": "CAPTAIN",
     "password": "CAPTAIN", 
