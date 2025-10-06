@@ -7,6 +7,13 @@
     "allowOffline": true
   },
   {
+    "id": "a7a626b36262ed7d",
+    "username": "RAKIN",
+    "password": "RAKIN123", 
+    "expiresAt": "2025-10-07",
+    "allowOffline": false
+  },
+  {
     "id": "bb58cfa73cb7c38d",
     "username": "999",
     "password": "999", 
