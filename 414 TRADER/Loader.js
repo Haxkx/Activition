@@ -15,47 +15,55 @@
     };
 
     // -------------------- URL REDIRECTION & DEMO TO LIVE SPOOF --------------------
-    function setupDemoToLiveSpoof() {
-        try {
-            const baseUrl = window.location.origin;
-            
-            // Redirect from live to demo but show as live
-            if (location.pathname === "/en/trade") {
-                location.replace(baseUrl + "/en/demo-trade");
-                return;
-            }
-            
-            // Convert demo page to look like live
-            if (location.pathname === "/en/demo-trade") {
-                const liveUrl = baseUrl + "/en/trade";
-                document.title = "Live trading | Quotex";
-                
-                // Keep title as Live trading
-                const titleElement = document.querySelector("title") || document.createElement("title");
-                const observerConfig = { childList: true, subtree: true };
-                new MutationObserver(() => {
-                    if (document.title !== "Live trading | Quotex") {
-                        document.title = "Live trading | Quotex";
-                    }
-                }).observe(titleElement, observerConfig);
-                
-                history.replaceState(null, '', liveUrl);
-            }
-        } catch (error) {
-            console.error("Demo→Live spoof error:", error);
+function setupDemoToLiveSpoof() {
+    try {
+        const baseUrl = window.location.origin;
+        const currentPath = location.pathname;
+
+        // Prevent multiple executions by checking a flag
+        if (window.demoToLiveSpoofed) {
+            return;
         }
+        window.demoToLiveSpoofed = true; // Set flag to prevent re-execution
+
+        // Only manipulate UI for demo-trade, no redirect
+        if (currentPath === "/en/demo-trade") {
+            const liveUrl = baseUrl + "/en/trade";
+            document.title = "Live trading | Quotex";
+
+            // Update history without triggering navigation
+            history.replaceState(null, '', liveUrl);
+
+            // Monitor title changes to maintain "Live trading | Quotex"
+            const titleElement = document.querySelector("title") || document.createElement("title");
+            const observerConfig = { childList: true, subtree: true };
+            new MutationObserver(() => {
+                if (document.title !== "Live trading | Quotex") {
+                    document.title = "Live trading | Quotex";
+                }
+            }).observe(titleElement, observerConfig);
+        }
+
+        // No redirect for /en/trade; just ensure UI consistency
+        if (currentPath === "/en/trade") {
+            document.title = "Live trading | Quotex";
+        }
+
+    } catch (error) {
+        console.error("Demo→Live spoof error:", error);
     }
+}
 
     // -------------------- MAIN MOD FUNCTIONS --------------------
     function initializeMod() {
         console.log('🚀 Initializing Quotex Mod...');
-        
+
         // Setup demo to live conversion first
         setupDemoToLiveSpoof();
-        
+
         // Convert demo page to look like live
         convertDemoToLiveUI();
-        
+
         // Initialize all features
         setupBalanceTracking();
         setupAccountSwitcher();
@@ -63,10 +71,10 @@
         setupLeaderboardSystem();
         setupSettingsPopup();
         setupTransactionSystem();
-        
+
         // Start monitoring for changes
         startPageMonitoring();
-        
+
         console.log('✅ Quotex Mod: All features activated successfully');
     }
 
@@ -75,11 +83,11 @@
         try {
             // Update page title to show Live
             document.title = "Live trading | Quotex";
-            
+
             // Update URL to show /en/trade without reload
             const liveUrl = window.location.origin + "/en/trade";
             history.replaceState(null, '', liveUrl);
-            
+
             // Remove all demo indicators and show as Live
             const demoIndicators = document.querySelectorAll('[class*="demo"], [class*="Demo"]');
             demoIndicators.forEach(element => {
@@ -88,7 +96,7 @@
                     element.style.color = "#0faf59";
                 }
             });
-            
+
             // Update account name to show Live
             const accountNameElements = document.querySelectorAll('.---react-features-Usermenu-styles-module__infoName--SfrTV');
             accountNameElements.forEach(element => {
@@ -99,9 +107,9 @@
                     element.classList.remove("---react-features-Usermenu-styles-module__demo--TmWTp");
                 }
             });
-            
+
             console.log('✅ Demo page converted to Live UI');
-            
+
         } catch (error) {
             console.error("UI conversion error:", error);
         }
@@ -112,7 +120,7 @@
         const now = Date.now();
         let initialBalance = 0;
         const storedBalance = localStorage.getItem(CONFIG.STORAGE_KEYS.INITIAL_BALANCE);
-        
+
         if (storedBalance) {
             try {
                 const data = JSON.parse(storedBalance);
@@ -123,24 +131,24 @@
                 console.error("Balance parsing error:", e);
             }
         }
-        
+
         // Format currency display
         function formatNumber(num) {
             const options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
             return Math.abs(num).toLocaleString("en-US", options);
         }
-        
+
         // Update profit/loss display
         function updateProfitDisplay() {
             const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             const profitElement = document.querySelector(".position__header-money.--green, .position__header-money.--red, .position__header-money");
-            
+
             if (!currentBalanceElement || !profitElement) return;
-            
+
             const currentBalanceText = currentBalanceElement.textContent || '';
             const currentBalance = parseFloat(currentBalanceText.replace(/[^0-9.-]/g, '')) || 0;
             const profitLoss = currentBalance - initialBalance;
-            
+
             if (profitLoss === 0) {
                 profitElement.innerText = "$0.00";
             } else if (profitLoss > 0) {
@@ -151,26 +159,26 @@
                 profitElement.style.color = "#ff3e3e";
             }
         }
-        
+
         // Update account level and display - FIXED: Add level icon before balance
         function updateAccountDisplay() {
             const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             if (!currentBalanceElement) return;
-            
+
             const currentBalanceText = currentBalanceElement.textContent || '';
             const currentBalance = parseFloat(currentBalanceText.replace(/[^0-9.-]/g, '')) || 0;
             let accountLevel = "standart";
-            
+
             if (currentBalance > 9999.99) {
                 accountLevel = "vip";
             } else if (currentBalance > 4999.99) {
                 accountLevel = "pro";
             }
-            
+
             // Update level icons - FIXED: Ensure level icon appears before balance
             const levelIcons = document.querySelectorAll(".---react-features-Usermenu-styles-module__infoLevels--ePf8T svg use, .---react-features-Usermenu-Dropdown-styles-module__levelIcon--lmj_k svg use");
             const levelHref = "/profile/images/spritemap.svg#icon-profile-level-" + accountLevel;
-            
+
             levelIcons.forEach(icon => {
                 if (icon) {
                     icon.setAttribute("xlink:href", levelHref);
@@ -182,7 +190,7 @@
                     }
                 }
             });
-            
+
             // Ensure level container is visible
             const levelContainer = document.querySelector(".---react-features-Usermenu-styles-module__infoLevels--ePf8T");
             if (levelContainer) {
@@ -190,7 +198,7 @@
                 levelContainer.style.visibility = "visible";
                 levelContainer.style.opacity = "1";
             }
-            
+
             // Update account name to show Live
             const accountNameElement = document.querySelector(".---react-features-Usermenu-styles-module__infoName--SfrTV.---react-features-Usermenu-styles-module__demo--TmWTp");
             if (accountNameElement) {
@@ -198,7 +206,7 @@
                 accountNameElement.style.color = "#0faf59";
                 accountNameElement.classList.remove("---react-features-Usermenu-styles-module__demo--TmWTp");
             }
-            
+
             // Also update any other demo indicators to show as Live
             const demoIndicators = document.querySelectorAll('.---react-features-Usermenu-styles-module__demo--TmWTp');
             demoIndicators.forEach(indicator => {
@@ -206,11 +214,11 @@
                 indicator.style.color = "#0faf59";
                 indicator.classList.remove("---react-features-Usermenu-styles-module__demo--TmWTp");
             });
-            
+
             // Update level benefits
             const levelNameElement = document.querySelector(".---react-features-Usermenu-Dropdown-styles-module__levelName--wFviC");
             const levelProfitElement = document.querySelector(".---react-features-Usermenu-Dropdown-styles-module__levelProfit--UkDJi");
-            
+
             if (levelNameElement && levelProfitElement) {
                 if (accountLevel === "vip") {
                     levelNameElement.textContent = "vip:";
@@ -224,26 +232,26 @@
                 }
             }
         }
-        
+
         // Update account level
         function updateAccountLevel() {
             const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             if (!currentBalanceElement) return;
-            
+
             const currentBalanceText = currentBalanceElement.textContent || '';
             const currentBalance = parseFloat(currentBalanceText.replace(/[^0-9.-]/g, '')) || 0;
             let accountLevel = "standart";
-            
+
             if (currentBalance > 9999.99) {
                 accountLevel = "vip";
             } else if (currentBalance > 4999.99) {
                 accountLevel = "pro";
             }
-            
+
             // Update level icons
             const levelIcons = document.querySelectorAll(".---react-features-Usermenu-styles-module__infoLevels--ePf8T svg use, .---react-features-Usermenu-Dropdown-styles-module__levelIcon--lmj_k svg use");
             const levelHref = "/profile/images/spritemap.svg#icon-profile-level-" + accountLevel;
-            
+
             levelIcons.forEach(icon => {
                 if (icon) {
                     icon.setAttribute("xlink:href", levelHref);
@@ -255,7 +263,7 @@
                 }
             });
         }
-        
+
         // Return functions for external use
         return {
             updateProfitDisplay,
@@ -279,41 +287,41 @@
         function switchToLiveAccount() {
             const menuItems = [...document.querySelectorAll('li')];
             if (!menuItems.length) return;
-            
+
             const demoItem = menuItems.find(item => item.textContent && item.textContent.includes("Demo Account"));
             const liveItem = menuItems.find(item => item.textContent && item.textContent.includes("Live"));
-            
+
             if (!demoItem || !liveItem) return;
-            
+
             const demoBalance = demoItem.querySelector('b');
             const liveBalance = liveItem.querySelector('b');
-            
+
             if (!demoBalance || !liveBalance) return;
-            
+
             // Set demo balance to $10,000
             demoBalance.textContent = '$10000.00';
-            
+
             // Get current live balance
             const mainBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoText--58LeE .---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             let currentBalance = 0;
-            
+
             if (mainBalanceElement && mainBalanceElement.textContent) {
                 currentBalance = parseFloat(mainBalanceElement.textContent.replace(/[^0-9.-]/g, '')) || 0;
             }
-            
+
             liveBalance.textContent = '$' + currentBalance.toFixed(2);
-            
+
             // Ensure Live account is active
             const activeClass = "---react-features-Usermenu-Dropdown-styles-module__active--P5n2A";
             if (demoItem.classList.contains(activeClass)) {
                 demoItem.classList.remove(activeClass);
             }
-            
+
             if (!liveItem.classList.contains(activeClass)) {
                 liveItem.classList.add(activeClass);
             }
         }
-        
+
         return { updateAccountDisplay: switchToLiveAccount };
     }
 
@@ -321,36 +329,36 @@
     function setupProfitCalculator() {
         let lastProfitChange = null;
         let expandPercent = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.EXPAND_PERCENT)) || 0;
-        
+
         function updateExpandPercent() {
             const balanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             const balanceTracker = setupBalanceTracking();
             const initialBalance = balanceTracker.getInitialBalance();
-            
+
             const currentBalance = balanceElement?.textContent ? parseFloat(balanceElement.textContent.replace(/[^0-9.-]/g, '')) : 0;
             const profitChange = currentBalance - initialBalance;
-            
+
             // Update expand percentage if profit changed
             if (profitChange !== lastProfitChange) {
                 expandPercent = Math.floor(Math.random() * 91) + 10;
                 lastProfitChange = profitChange;
                 localStorage.setItem(CONFIG.STORAGE_KEYS.EXPAND_PERCENT, expandPercent.toString());
             }
-            
+
             // Update progress bar
             const expandBar = document.querySelector(".position__loading .position__expand");
             if (expandBar) {
                 expandBar.style.width = expandPercent + '%';
             }
         }
-        
+
         function updateSliderDisplay(percent) {
             const display = document.getElementById("sliderPercentDisplay");
             if (display) {
                 display.textContent = percent + '%';
             }
         }
-        
+
         return {
             updateProfitCalculation: updateExpandPercent,
             updateSliderDisplay,
@@ -359,7 +367,7 @@
                 expandPercent = parseInt(percent) || 0;
                 localStorage.setItem(CONFIG.STORAGE_KEYS.EXPAND_PERCENT, expandPercent.toString());
                 updateSliderDisplay(expandPercent);
-                
+
                 // Update progress bar immediately
                 const expandBar = document.querySelector(".position__loading .position__expand");
                 if (expandBar) {
@@ -373,7 +381,7 @@
     function setupLeaderboardSystem() {
         let currentPositionIndex = null;
         const originalItems = {};
-        
+
         const positionData = [
             { profit: -10000, position: 60000 },
             { profit: 0, position: 58503 },
@@ -381,95 +389,95 @@
             { profit: 7902, position: 21 },
             { profit: 20000, position: 1 }
         ];
-        
+
         function getCurrentUserData() {
             const header = document.querySelector(".position__header");
             if (!header) return null;
-            
+
             const moneyElement = header.querySelector(".position__header-money");
             const profitText = moneyElement?.textContent || '0';
             const profit = parseFloat(profitText.replace(/[^0-9.-]+/g, '')) || 0;
-            
+
             let userData = {};
             try {
                 userData = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.LEADERBOARD_DATA)) || {};
             } catch (e) {
                 console.error("Leaderboard data parsing error:", e);
             }
-            
+
             return {
                 name: userData.name || "You",
                 profit: profit,
                 flagCode: userData.flag || 'bd'
             };
         }
-        
+
         function calculatePosition(profit) {
             const sortedData = [...positionData].sort((a, b) => a.profit - b.profit);
-            
+
             if (profit <= sortedData[0].profit) {
                 return sortedData[0].position;
             }
-            
+
             if (profit >= sortedData[sortedData.length - 1].profit) {
                 return sortedData[sortedData.length - 1].position;
             }
-            
+
             for (let i = 0; i < sortedData.length - 1; i++) {
                 const current = sortedData[i];
                 const next = sortedData[i + 1];
-                
+
                 if (profit >= current.profit && profit <= next.profit) {
                     const ratio = (next.position - current.position) / (next.profit - current.profit);
                     return Math.round(ratio * (profit - current.profit) + current.position);
                 }
             }
-            
+
             return sortedData[0].position;
         }
-        
+
         function updatePositionFooter(position) {
             const footer = document.querySelector(".position__footer");
             if (!footer) return;
-            
+
             footer.innerHTML = `
                 <span style="color: var(--color-black-50); font-weight: 500;">Your position:</span>
                 <span style="font-weight: 700;">${position}</span>
             `;
         }
-        
+
         function restoreItem(index) {
             const items = document.querySelectorAll(".leader-board__item");
             if (items[index] && originalItems[index]) {
                 items[index].innerHTML = originalItems[index];
             }
         }
-        
+
         function updateLeaderboardItem(userData) {
             const itemsContainer = document.querySelector(".leader-board__items");
             if (!itemsContainer) return;
-            
+
             const items = Array.from(itemsContainer.querySelectorAll(".leader-board__item"));
             if (!items.length) return;
-            
+
             let targetIndex = items.findIndex(item => {
                 const money = item.querySelector(".leader-board__item-money");
                 const itemProfit = money ? (parseFloat(money.textContent.replace(/[^0-9.-]+/g, '')) || 0) : 0;
                 return itemProfit <= userData.profit;
             });
-            
+
             if (targetIndex === -1) targetIndex = items.length - 1;
-            
+
             if (currentPositionIndex !== targetIndex) {
                 if (currentPositionIndex !== null) {
                     restoreItem(currentPositionIndex);
                 }
-                
+
                 const targetItem = items[targetIndex];
                 if (!originalItems[targetIndex]) {
                     originalItems[targetIndex] = targetItem.innerHTML;
                 }
-                
+
                 // Update flag
                 const flagSvg = targetItem.querySelector(".leader-board__item-block svg.flag");
                 const flagUse = flagSvg?.querySelector("use");
@@ -479,7 +487,7 @@
                         flagUse.setAttribute("xlink:href", "/profile/images/flags.svg#flag-" + userData.flagCode);
                     } catch (e) {}
                 }
-                
+
                 // Update avatar
                 const avatar = targetItem.querySelector(".leader-board__item-avatar");
                 if (avatar) {
@@ -489,13 +497,13 @@
                         </svg>
                     `;
                 }
-                
+
                 // Update name
                 const nameElement = targetItem.querySelector(".leader-board__item-name");
                 if (nameElement) {
                     nameElement.textContent = userData.name;
                 }
-                
+
                 // Update profit
                 const moneyElement = targetItem.querySelector(".leader-board__item-money");
                 if (moneyElement) {
@@ -503,12 +511,12 @@
                     moneyElement.textContent = '$' + balanceTracker.formatCurrency(userData.profit);
                     moneyElement.style.color = userData.profit < 0 ? "#fd4d3c" : "#0faf59";
                 }
-                
+
                 currentPositionIndex = targetIndex;
                 updatePositionFooter(targetIndex + 1);
             }
         }
-        
+
         function updateLeaderboardPosition() {
             const userData = getCurrentUserData();
             if (!userData) {
@@ -519,25 +527,25 @@
                 updatePositionFooter(calculatePosition(0));
                 return;
             }
-            
+
             const itemsContainer = document.querySelector(".leader-board__items");
             if (!itemsContainer) return;
-            
+
             const items = Array.from(itemsContainer.querySelectorAll(".leader-board__item"));
             if (!items.length) return;
-            
+
             const lastItem = items[items.length - 1];
             const lastMoneyElement = lastItem.querySelector(".leader-board__item-money");
             const lastProfitText = lastMoneyElement?.textContent || '0';
             const lastProfit = parseFloat(lastProfitText.replace(/[^0-9.-]+/g, '')) || 0;
-            
+
             if (userData.profit >= lastProfit) {
                 updateLeaderboardItem(userData);
             } else {
                 updatePositionFooter(calculatePosition(userData.profit));
             }
         }
-        
+
         // Initialize leaderboard monitoring
         function initLeaderboardObserver() {
             const itemsContainer = document.querySelector(".leader-board__items");
@@ -545,20 +553,20 @@
                 setTimeout(initLeaderboardObserver, 1000);
                 return;
             }
-            
+
             const observer = new MutationObserver(updateLeaderboardPosition);
             observer.observe(itemsContainer, {
                 childList: true,
                 subtree: true
             });
-            
+
             updateLeaderboardPosition();
             setInterval(updateLeaderboardPosition, 2000);
         }
-        
+
         // Start leaderboard monitoring
         setTimeout(initLeaderboardObserver, 2000);
-        
+
         return {
             updateLeaderboard: updateLeaderboardPosition,
             setUserData: (name, flag) => {
@@ -576,7 +584,7 @@
     function setupSettingsPopup() {
         function createSettingsPopup() {
             if (document.querySelector("#capitalBalancePopup")) return;
-            
+
             const popup = document.createElement("div");
             popup.id = "capitalBalancePopup";
             popup.innerHTML = `
@@ -615,7 +623,7 @@
                     <button id="cancelCapitalBtn" class="sl-button sl-cancel">Cancel</button>
                 </div>
             `;
-            
+
             // Style the popup
             Object.assign(popup.style, {
                 position: "fixed",
@@ -633,7 +641,7 @@
                 fontFamily: "'Segoe UI', sans-serif",
                 animation: "slFadeZoom 0.4s ease"
             });
-            
+
             // Add styles
             const styles = document.createElement("style");
             styles.textContent = `
@@ -661,40 +669,40 @@
             `;
             document.head.appendChild(styles);
             document.body.appendChild(popup);
-            
+
             // Setup popup slider with current value
             const popupSlider = document.getElementById("capitalPercentSlider");
             const popupDisplay = document.getElementById("sliderPercentDisplay");
             const profitCalculator = setupProfitCalculator();
-            
+
             const currentPercent = profitCalculator.getExpandPercent();
             popupSlider.value = currentPercent;
             popupDisplay.textContent = currentPercent + '%';
-            
+
             popupSlider.oninput = function() {
                 popupDisplay.textContent = this.value + '%';
-                
+
                 // Update progress bar in real-time
                 const expandBar = document.querySelector(".position__loading .position__expand");
                 if (expandBar) {
                     expandBar.style.width = this.value + '%';
                 }
             };
-            
+
             // Setup buttons
             document.getElementById("setCapitalBtn").onclick = function() {
                 const leaderboardAmountInput = document.getElementById("leaderboardInput").value;
                 const leaderboardName = document.getElementById("leaderboardNameInput").value.trim();
                 const leaderboardFlag = document.getElementById("leaderboardFlagInput").value.trim().toLowerCase();
                 const sliderValue = parseInt(popupSlider.value) || 0;
-                
+
                 const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
                 let currentBalance = 0;
-                
+
                 if (currentBalanceElement && currentBalanceElement.textContent) {
                     currentBalance = parseFloat(currentBalanceElement.textContent.replace(/[^0-9.-]/g, '')) || 0;
                 }
-                
+
                 // Handle leaderboard amount
                 if (leaderboardAmountInput !== '') {
                     const leaderboardAmount = parseFloat(leaderboardAmountInput);
@@ -704,17 +712,17 @@
                             return;
                         }
                         const newInitialBalance = currentBalance - leaderboardAmount;
-                        
+
                         const balanceTracker = setupBalanceTracking();
                         balanceTracker.setInitialBalance(newInitialBalance);
                     }
                 }
-                
+
                 // Handle leaderboard name and flag
                 if (leaderboardName || leaderboardFlag) {
                     const leaderboardSystem = setupLeaderboardSystem();
                     leaderboardSystem.setUserData(leaderboardName, leaderboardFlag);
-                    
+
                     // Update position header if elements exist
                     const positionHeader = document.querySelector(".position__header-name");
                     if (positionHeader && leaderboardName && leaderboardFlag) {
@@ -726,23 +734,23 @@
                         `;
                     }
                 }
-                
+
                 // Handle slider value
                 profitCalculator.setExpandPercent(sliderValue);
-                
+
                 // Close popup
                 popup.remove();
                 styles.remove();
-                
+
                 console.log('Settings applied successfully');
             };
-            
+
             document.getElementById("cancelCapitalBtn").onclick = function() {
                 popup.remove();
                 styles.remove();
             };
         }
-        
+
         // Intercept deposit buttons - FIXED: Show transaction menu instead of settings
         function interceptDeposits() {
             const elements = document.querySelectorAll("a,button");
@@ -763,7 +771,7 @@
                 }
             });
         }
-        
+
         // Helper function to get transaction system
         function getTransactionSystem() {
             if (window.customTransactionManager) {
@@ -771,17 +779,17 @@
             }
             return null;
         }
-        
+
         // Setup deposit interception
         const interceptObserver = new MutationObserver(interceptDeposits);
         interceptObserver.observe(document.body, { childList: true, subtree: true });
-        
+
         if (document.readyState === "complete" || document.readyState === "interactive") {
             interceptDeposits();
         } else {
             document.addEventListener("DOMContentLoaded", interceptDeposits);
         }
-        
+
         // Keyboard shortcut
         document.addEventListener("keydown", function(event) {
             if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 's') {
@@ -789,7 +797,7 @@
                 createSettingsPopup();
             }
         });
-        
+
         return { createSettingsPopup };
     }
 
@@ -1128,7 +1136,7 @@
                     document.querySelectorAll('a, button').forEach(button => {
                         const text = button.textContent?.toLowerCase();
                         const href = button.href?.toLowerCase();
-                        
+
                         if (text && text.includes('deposit') || (href && href.includes('deposit'))) {
                             overrideButton(button);
                         }
@@ -1382,7 +1390,7 @@
                         </div>
                     </div>
                 `;
-                
+
                 content.innerHTML = successHTML;
             }
 
@@ -1405,7 +1413,7 @@
                         </div>
                     </div>
                 `;
-                
+
                 content.innerHTML = successHTML;
             }
 
@@ -1420,10 +1428,10 @@
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `custom-message custom-message-${type}`;
                 messageDiv.innerHTML = message;
-                
+
                 const content = document.getElementById('customTransactionContent');
                 content.insertBefore(messageDiv, content.firstChild);
-                
+
                 setTimeout(() => {
                     if (messageDiv.parentNode) {
                         messageDiv.parentNode.removeChild(messageDiv);
@@ -1440,7 +1448,7 @@
 
             handlePageSpecificContent() {
                 const currentPath = window.location.pathname;
-                
+
                 if (currentPath.includes('/withdrawal')) {
                     setTimeout(() => this.injectWithdrawalContent(), 1000);
                 } else if (currentPath.includes('/balance') || currentPath.includes('/transactions')) {
@@ -1464,11 +1472,11 @@
 
                 const section = document.createElement('div');
                 section.className = 'custom-withdrawal-section';
-                
+
                 const withdrawals = this.transactions
                     .filter(t => t.type === 'withdraw')
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
+
                 if (withdrawals.length === 0) {
                     section.innerHTML = `
                         <div style="padding: 20px; text-align: center; color: #666;">
@@ -1524,9 +1532,9 @@
 
                 const section = document.createElement('div');
                 section.className = 'custom-transactions-section';
-                
+
                 const latestTransactions = this.transactions.slice(0, 10);
-                
+
                 if (latestTransactions.length === 0) {
                     section.innerHTML = `
                         <div style="padding: 20px; text-align: center; color: #666;">
@@ -1538,12 +1546,12 @@
                         const amountClass = transaction.type === 'deposit' ? 'custom-transaction-amount-deposit' : 'custom-transaction-amount-red';
                         const statusClass = transaction.status === 'success' ? 'success' : 
                                           transaction.status === 'pending' ? 'pending' : 'failed';
-                        
+
                         // CHANGED: Use displayStatus instead of status
                         const statusDisplay = transaction.displayStatus || 
                                             (transaction.status === 'success' ? 'Successed' : 
                                              transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1));
-                        
+
                         return `
                         <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item--imQKR">
                             <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__id--Ttk2j">${transaction.id}</div>
@@ -1593,7 +1601,7 @@
 
             setupPageMonitoring() {
                 let lastUrl = window.location.href;
-                
+
                 const observer = new MutationObserver(() => {
                     if (window.location.href !== lastUrl) {
                         lastUrl = window.location.href;
@@ -1602,13 +1610,13 @@
                         }, 1000);
                     }
                 });
-                
+
                 observer.observe(document, { subtree: true, childList: true });
 
                 const domObserver = new MutationObserver(() => {
                     this.handlePageSpecificContent();
                 });
-                
+
                 domObserver.observe(document.body, { childList: true, subtree: true });
             }
         }
@@ -1626,9 +1634,9 @@
         const balanceTracker = setupBalanceTracking();
         const accountSwitcher = setupAccountSwitcher();
         const profitCalculator = setupProfitCalculator();
-        
+
         let debounceTimer = null;
-        
+
         function debounceUpdates() {
             if (debounceTimer) clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -1643,14 +1651,14 @@
                 }
             }, 120);
         }
-        
+
         // Monitor page changes
         const pageObserver = new MutationObserver(debounceUpdates);
         pageObserver.observe(document.body, {
             childList: true,
             subtree: true
         });
-        
+
         // Initial setup
         window.addEventListener("load", () => {
             setTimeout(() => {
@@ -1660,7 +1668,7 @@
                 balanceTracker.updateAccountLevel();
             }, 800);
         });
-        
+
         // Periodic updates
         setInterval(() => {
             balanceTracker.updateAccountDisplay();
@@ -1674,10 +1682,10 @@
     // -------------------- INITIALIZE ALL SYSTEMS --------------------
     function initializeAllSystems() {
         console.log('🚀 Initializing All Systems...');
-        
+
         // Initialize main mod
         initializeMod();
-        
+
         console.log('✅ All Systems Activated Successfully');
     }
 
