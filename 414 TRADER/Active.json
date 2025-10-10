@@ -1,1 +1,16 @@
-
+[
+  {
+    "id": "6d95fa17c7e40bea",
+    "username": "captain", 
+    "password": "captain",
+    "expiresAt": "2025-12-31",
+    "allowOffline": true
+  },
+  {
+    "id": "a7a626b36262ed7d",
+    "username": "RAKIN",
+    "password": "RAKIN123", 
+    "expiresAt": "2025-10-07",
+    "allowOffline": false
+  }
+]
