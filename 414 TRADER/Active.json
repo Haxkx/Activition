@@ -1,7 +1,7 @@
 [
   {
     "id": "aa7743460bca4837",
-    "username": "captain", 
+    "username": "captain",
     "password": "captain",
     "expiresAt": "2026-12-31",
     "allowOffline": true
@@ -9,14 +9,14 @@
   {
     "id": "eb40cee4b51b2b14",
     "username": "414TRADER",
-    "password": "414TRADER", 
+    "password": "414TRADER",
     "expiresAt": "2026-12-29",
     "allowOffline": false
   },
   {
     "id": "98a78885ffeacf9a",
     "username": "414TRADER",
-    "password": "414TRADER", 
+    "password": "414TRADER",
     "expiresAt": "2026-12-29",
     "allowOffline": false
   }
