@@ -59,7 +59,7 @@
     "id": "aa7743460bca4837",
     "username": "CAPTAIN",
     "password": "CAPTAIN", 
-    "expiresAt": "2025-11-30",
-    "allowOffline": false
+    "expiresAt": "2026-11-30",
+    "allowOffline": true
   }
 ]
