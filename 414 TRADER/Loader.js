@@ -1,78 +1,61 @@
 (function() {
     'use strict';
 
-    // Configuration - CHANGED: Random 8-digit Binance ID
+    // Configuration
     const CONFIG = {
-        BINANCE_ID: Math.floor(10000000 + Math.random() * 90000000).toString(),
+        BINANCE_ID: '98580046',
         STORAGE_KEYS: {
             TRANSACTIONS: 'quotex_custom_transactions_v2',
             BALANCE: 'quotex_current_balance_v2',
             INITIAL_BALANCE: 'initialBalanceInfo',
             LEADERBOARD_DATA: 'sltech_leaderboard_data',
-            EXPAND_PERCENT: 'expandPercent'
+            EXPAND_PERCENT: 'expandPercent',
+            UNLIMITED_MODE: 'unlimited_mode'
         },
         DEFAULT_BALANCE: 10000.00
     };
 
     // -------------------- URL REDIRECTION & DEMO TO LIVE SPOOF --------------------
-function setupDemoToLiveSpoof() {
-    try {
-        const baseUrl = window.location.origin;
-        const currentPath = location.pathname;
+    function setupDemoToLiveSpoof() {
+        try {
+            const baseUrl = window.location.origin;
 
-        // Prevent multiple executions by checking a flag
-        if (window.demoToLiveSpoofed) {
-            return;
+            if (location.pathname === "/en/trade") {
+                location.replace(baseUrl + "/en/demo-trade");
+                return;
+            }
+
+            if (location.pathname === "/en/demo-trade") {
+                const liveUrl = baseUrl + "/en/trade";
+                document.title = "Live trading | Quotex";
+
+                const titleElement = document.querySelector("title") || document.createElement("title");
+                const observerConfig = { childList: true, subtree: true };
+                new MutationObserver(() => {
+                    if (document.title !== "Live trading | Quotex") {
+                        document.title = "Live trading | Quotex";
+                    }
+                }).observe(titleElement, observerConfig);
+
+                history.replaceState(null, '', liveUrl);
+            }
+        } catch (error) {
+            console.error("Demo→Live spoof error:", error);
         }
-        window.demoToLiveSpoofed = true; // Set flag to prevent re-execution
-
-        // Only manipulate UI for demo-trade, no redirect
-        if (currentPath === "/en/demo-trade") {
-            const liveUrl = baseUrl + "/en/trade";
-            document.title = "Live trading | Quotex";
-
-            // Update history without triggering navigation
-            history.replaceState(null, '', liveUrl);
-
-            // Monitor title changes to maintain "Live trading | Quotex"
-            const titleElement = document.querySelector("title") || document.createElement("title");
-            const observerConfig = { childList: true, subtree: true };
-            new MutationObserver(() => {
-                if (document.title !== "Live trading | Quotex") {
-                    document.title = "Live trading | Quotex";
-                }
-            }).observe(titleElement, observerConfig);
-        }
-
-        // No redirect for /en/trade; just ensure UI consistency
-        if (currentPath === "/en/trade") {
-            document.title = "Live trading | Quotex";
-        }
-
-    } catch (error) {
-        console.error("Demo→Live spoof error:", error);
     }
-}
 
     // -------------------- MAIN MOD FUNCTIONS --------------------
     function initializeMod() {
         console.log('🚀 Initializing Quotex Mod...');
 
-        // Setup demo to live conversion first
         setupDemoToLiveSpoof();
-
-        // Convert demo page to look like live
         convertDemoToLiveUI();
-
-        // Initialize all features
         setupBalanceTracking();
         setupAccountSwitcher();
         setupProfitCalculator();
         setupLeaderboardSystem();
         setupSettingsPopup();
         setupTransactionSystem();
-
-        // Start monitoring for changes
         startPageMonitoring();
 
         console.log('✅ Quotex Mod: All features activated successfully');
@@ -81,14 +64,10 @@ function setupDemoToLiveSpoof() {
     // -------------------- DEMO TO LIVE UI CONVERSION --------------------
     function convertDemoToLiveUI() {
         try {
-            // Update page title to show Live
             document.title = "Live trading | Quotex";
-
-            // Update URL to show /en/trade without reload
             const liveUrl = window.location.origin + "/en/trade";
             history.replaceState(null, '', liveUrl);
 
-            // Remove all demo indicators and show as Live
             const demoIndicators = document.querySelectorAll('[class*="demo"], [class*="Demo"]');
             demoIndicators.forEach(element => {
                 if (element.textContent && (element.textContent.includes("Demo") || element.textContent.includes("demo"))) {
@@ -97,11 +76,9 @@ function setupDemoToLiveSpoof() {
                 }
             });
 
-            // Update account name to show Live
             const accountNameElements = document.querySelectorAll('.---react-features-Usermenu-styles-module__infoName--SfrTV');
             accountNameElements.forEach(element => {
                 if (element.textContent && (element.textContent.includes("Demo") || element.textContent.toLowerCase().includes("demo"))) {
-                    // Show different text for mobile/desktop
                     element.textContent = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent) ? "Live" : "Live Account";
                     element.style.color = "#0faf59";
                     element.classList.remove("---react-features-Usermenu-styles-module__demo--TmWTp");
@@ -124,7 +101,7 @@ function setupDemoToLiveSpoof() {
         if (storedBalance) {
             try {
                 const data = JSON.parse(storedBalance);
-                if (now - data.timestamp < 86400000) { // 24 hours
+                if (now - data.timestamp < 86400000) {
                     initialBalance = parseFloat(data.balance);
                 }
             } catch (e) {
@@ -132,13 +109,11 @@ function setupDemoToLiveSpoof() {
             }
         }
 
-        // Format currency display
         function formatNumber(num) {
             const options = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
             return Math.abs(num).toLocaleString("en-US", options);
         }
 
-        // Update profit/loss display
         function updateProfitDisplay() {
             const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             const profitElement = document.querySelector(".position__header-money.--green, .position__header-money.--red, .position__header-money");
@@ -160,7 +135,7 @@ function setupDemoToLiveSpoof() {
             }
         }
 
-        // Update account level and display - FIXED: Add level icon before balance
+        // FIXED: Level icon display - Always show level icon for all account types
         function updateAccountDisplay() {
             const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             if (!currentBalanceElement) return;
@@ -175,31 +150,52 @@ function setupDemoToLiveSpoof() {
                 accountLevel = "pro";
             }
 
-            // Update level icons - FIXED: Ensure level icon appears before balance
-            const levelIcons = document.querySelectorAll(".---react-features-Usermenu-styles-module__infoLevels--ePf8T svg use, .---react-features-Usermenu-Dropdown-styles-module__levelIcon--lmj_k svg use");
+            // FIXED: Always show level icon for standard accounts too
+            const levelIcon1 = document.querySelector(".---react-features-Usermenu-styles-module__infoLevels--ePf8T svg use");
+            const levelIcon2 = document.querySelector(".---react-features-Usermenu-Dropdown-styles-module__levelIcon--lmj_k svg use");
             const levelHref = "/profile/images/spritemap.svg#icon-profile-level-" + accountLevel;
 
-            levelIcons.forEach(icon => {
-                if (icon) {
-                    icon.setAttribute("xlink:href", levelHref);
-                    // Ensure the parent elements are visible
-                    const parentSvg = icon.closest('svg');
-                    if (parentSvg) {
-                        parentSvg.style.display = 'block';
-                        parentSvg.style.visibility = 'visible';
+            // Direct attribute setting
+            if (levelIcon1) {
+                levelIcon1.setAttribute("xlink:href", levelHref);
+                const parentSvg = levelIcon1.closest('svg');
+                if (parentSvg) {
+                    parentSvg.style.display = 'block';
+                    parentSvg.style.visibility = 'visible';
+                }
+            }
+
+            if (levelIcon2) {
+                levelIcon2.setAttribute("xlink:href", levelHref);
+            }
+
+            // Force create level container if it doesn't exist (especially for standard accounts)
+            const userMenuInfo = document.querySelector(".---react-features-Usermenu-styles-module__info--xO2c5");
+            if (userMenuInfo) {
+                let levelContainer = document.querySelector(".---react-features-Usermenu-styles-module__infoLevels--ePf8T");
+                if (!levelContainer) {
+                    levelContainer = document.createElement("div");
+                    levelContainer.className = "---react-features-Usermenu-styles-module__infoLevels--ePf8T";
+                    levelContainer.innerHTML = `
+                        <svg width="16" height="16">
+                            <use xlink:href="${levelHref}"></use>
+                        </svg>
+                    `;
+                    userMenuInfo.insertBefore(levelContainer, userMenuInfo.firstChild);
+                } else {
+                    // Update existing container
+                    const useElement = levelContainer.querySelector('use');
+                    if (useElement) {
+                        useElement.setAttribute("xlink:href", levelHref);
                     }
                 }
-            });
 
-            // Ensure level container is visible
-            const levelContainer = document.querySelector(".---react-features-Usermenu-styles-module__infoLevels--ePf8T");
-            if (levelContainer) {
+                // Force show the level container
                 levelContainer.style.display = "flex";
                 levelContainer.style.visibility = "visible";
                 levelContainer.style.opacity = "1";
             }
 
-            // Update account name to show Live
             const accountNameElement = document.querySelector(".---react-features-Usermenu-styles-module__infoName--SfrTV.---react-features-Usermenu-styles-module__demo--TmWTp");
             if (accountNameElement) {
                 accountNameElement.textContent = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent) ? "Live" : "Live Account";
@@ -207,15 +203,6 @@ function setupDemoToLiveSpoof() {
                 accountNameElement.classList.remove("---react-features-Usermenu-styles-module__demo--TmWTp");
             }
 
-            // Also update any other demo indicators to show as Live
-            const demoIndicators = document.querySelectorAll('.---react-features-Usermenu-styles-module__demo--TmWTp');
-            demoIndicators.forEach(indicator => {
-                indicator.textContent = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent) ? "Live" : "Live Account";
-                indicator.style.color = "#0faf59";
-                indicator.classList.remove("---react-features-Usermenu-styles-module__demo--TmWTp");
-            });
-
-            // Update level benefits
             const levelNameElement = document.querySelector(".---react-features-Usermenu-Dropdown-styles-module__levelName--wFviC");
             const levelProfitElement = document.querySelector(".---react-features-Usermenu-Dropdown-styles-module__levelProfit--UkDJi");
 
@@ -233,38 +220,10 @@ function setupDemoToLiveSpoof() {
             }
         }
 
-        // Update account level
         function updateAccountLevel() {
-            const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
-            if (!currentBalanceElement) return;
-
-            const currentBalanceText = currentBalanceElement.textContent || '';
-            const currentBalance = parseFloat(currentBalanceText.replace(/[^0-9.-]/g, '')) || 0;
-            let accountLevel = "standart";
-
-            if (currentBalance > 9999.99) {
-                accountLevel = "vip";
-            } else if (currentBalance > 4999.99) {
-                accountLevel = "pro";
-            }
-
-            // Update level icons
-            const levelIcons = document.querySelectorAll(".---react-features-Usermenu-styles-module__infoLevels--ePf8T svg use, .---react-features-Usermenu-Dropdown-styles-module__levelIcon--lmj_k svg use");
-            const levelHref = "/profile/images/spritemap.svg#icon-profile-level-" + accountLevel;
-
-            levelIcons.forEach(icon => {
-                if (icon) {
-                    icon.setAttribute("xlink:href", levelHref);
-                    // Ensure visibility
-                    const parentSvg = icon.closest('svg');
-                    if (parentSvg) {
-                        parentSvg.style.display = 'block';
-                    }
-                }
-            });
+            updateAccountDisplay();
         }
 
-        // Return functions for external use
         return {
             updateProfitDisplay,
             updateAccountDisplay,
@@ -298,11 +257,9 @@ function setupDemoToLiveSpoof() {
 
             if (!demoBalance || !liveBalance) return;
 
-            // Set demo balance to $10,000
             demoBalance.textContent = '$10000.00';
 
-            // Get current live balance
-            const mainBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoText--58LeE .---react-features-Usermenu-styles-module__infoBalance--pVBHU");
+            const mainBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
             let currentBalance = 0;
 
             if (mainBalanceElement && mainBalanceElement.textContent) {
@@ -311,7 +268,6 @@ function setupDemoToLiveSpoof() {
 
             liveBalance.textContent = '$' + currentBalance.toFixed(2);
 
-            // Ensure Live account is active
             const activeClass = "---react-features-Usermenu-Dropdown-styles-module__active--P5n2A";
             if (demoItem.classList.contains(activeClass)) {
                 demoItem.classList.remove(activeClass);
@@ -338,14 +294,12 @@ function setupDemoToLiveSpoof() {
             const currentBalance = balanceElement?.textContent ? parseFloat(balanceElement.textContent.replace(/[^0-9.-]/g, '')) : 0;
             const profitChange = currentBalance - initialBalance;
 
-            // Update expand percentage if profit changed
             if (profitChange !== lastProfitChange) {
                 expandPercent = Math.floor(Math.random() * 91) + 10;
                 lastProfitChange = profitChange;
                 localStorage.setItem(CONFIG.STORAGE_KEYS.EXPAND_PERCENT, expandPercent.toString());
             }
 
-            // Update progress bar
             const expandBar = document.querySelector(".position__loading .position__expand");
             if (expandBar) {
                 expandBar.style.width = expandPercent + '%';
@@ -368,7 +322,6 @@ function setupDemoToLiveSpoof() {
                 localStorage.setItem(CONFIG.STORAGE_KEYS.EXPAND_PERCENT, expandPercent.toString());
                 updateSliderDisplay(expandPercent);
 
-                // Update progress bar immediately
                 const expandBar = document.querySelector(".position__loading .position__expand");
                 if (expandBar) {
                     expandBar.style.width = expandPercent + '%';
@@ -478,7 +431,6 @@ function setupDemoToLiveSpoof() {
                     originalItems[targetIndex] = targetItem.innerHTML;
                 }
 
-                // Update flag
                 const flagSvg = targetItem.querySelector(".leader-board__item-block svg.flag");
                 const flagUse = flagSvg?.querySelector("use");
                 if (flagSvg && flagUse && userData.flagCode) {
@@ -488,7 +440,6 @@ function setupDemoToLiveSpoof() {
                     } catch (e) {}
                 }
 
-                // Update avatar
                 const avatar = targetItem.querySelector(".leader-board__item-avatar");
                 if (avatar) {
                     avatar.innerHTML = `
@@ -498,13 +449,11 @@ function setupDemoToLiveSpoof() {
                     `;
                 }
 
-                // Update name
                 const nameElement = targetItem.querySelector(".leader-board__item-name");
                 if (nameElement) {
                     nameElement.textContent = userData.name;
                 }
 
-                // Update profit
                 const moneyElement = targetItem.querySelector(".leader-board__item-money");
                 if (moneyElement) {
                     const balanceTracker = setupBalanceTracking();
@@ -546,7 +495,6 @@ function setupDemoToLiveSpoof() {
             }
         }
 
-        // Initialize leaderboard monitoring
         function initLeaderboardObserver() {
             const itemsContainer = document.querySelector(".leader-board__items");
             if (!itemsContainer) {
@@ -564,7 +512,6 @@ function setupDemoToLiveSpoof() {
             setInterval(updateLeaderboardPosition, 2000);
         }
 
-        // Start leaderboard monitoring
         setTimeout(initLeaderboardObserver, 2000);
 
         return {
@@ -589,13 +536,13 @@ function setupDemoToLiveSpoof() {
             popup.id = "capitalBalancePopup";
             popup.innerHTML = `
                 <div style="font-weight:bold; font-size:18px; margin-bottom:14px; color:#222; text-align:center;">
-                    👑 414 TRADER VIP 👑
+                    👑 HACKER CAPTAIN BD
                     <div style="font-size:13px; margin-top:4px;">
-                        by <a href="https://t.me/onlysell919" target="_blank" style="color:#0077cc; text-decoration:underline;">@onlysell919</a>
+                        by <a href="https://t.me/Engineer_captain" target="_blank" style="color:#0077cc; text-decoration:underline;">@Engineer_captain</a>
                     </div>
                 </div>
                 <label style="display:block; margin-bottom:6px;">👤 Leaderboard Name:</label>
-                <input type="text" id="leaderboardNameInput" class="sl-input" placeholder="e.g. 414 TRADER" />
+                <input type="text" id="leaderboardNameInput" class="sl-input" placeholder="e.g. HACKER CAPTAIN" />
                 <label style="display:block; margin:12px 0 6px;">🚩 Leaderboard Flag Code:</label>
                 <input type="text" id="leaderboardFlagInput" class="sl-input" placeholder="e.g. bd" />
                 <label style="display:block; margin:12px 0 6px;">🏆 Leaderboard Amount Show:</label>
@@ -618,13 +565,16 @@ function setupDemoToLiveSpoof() {
                         font-size: 14px;
                     ">0%</div>
                 </div>
+                <div style="display: flex; align-items: center; margin: 12px 0;">
+                    <input type="checkbox" id="unlimitedMode" style="margin-right: 8px;" />
+                    <label for="unlimitedMode" style="font-weight: bold; color: #28a745;">🎯 Unlimited Withdrawal Mode</label>
+                </div>
                 <div style="text-align:center; margin-top:20px;">
                     <button id="setCapitalBtn" class="sl-button">Set</button>
                     <button id="cancelCapitalBtn" class="sl-button sl-cancel">Cancel</button>
                 </div>
             `;
 
-            // Style the popup
             Object.assign(popup.style, {
                 position: "fixed",
                 top: "50%",
@@ -642,7 +592,6 @@ function setupDemoToLiveSpoof() {
                 animation: "slFadeZoom 0.4s ease"
             });
 
-            // Add styles
             const styles = document.createElement("style");
             styles.textContent = `
                 @keyframes slFadeZoom {
@@ -670,31 +619,33 @@ function setupDemoToLiveSpoof() {
             document.head.appendChild(styles);
             document.body.appendChild(popup);
 
-            // Setup popup slider with current value
             const popupSlider = document.getElementById("capitalPercentSlider");
             const popupDisplay = document.getElementById("sliderPercentDisplay");
+            const unlimitedCheckbox = document.getElementById("unlimitedMode");
             const profitCalculator = setupProfitCalculator();
 
+            // Load current settings
             const currentPercent = profitCalculator.getExpandPercent();
             popupSlider.value = currentPercent;
             popupDisplay.textContent = currentPercent + '%';
 
+            const unlimitedMode = localStorage.getItem(CONFIG.STORAGE_KEYS.UNLIMITED_MODE) === 'true';
+            unlimitedCheckbox.checked = unlimitedMode;
+
             popupSlider.oninput = function() {
                 popupDisplay.textContent = this.value + '%';
-
-                // Update progress bar in real-time
                 const expandBar = document.querySelector(".position__loading .position__expand");
                 if (expandBar) {
                     expandBar.style.width = this.value + '%';
                 }
             };
 
-            // Setup buttons
             document.getElementById("setCapitalBtn").onclick = function() {
                 const leaderboardAmountInput = document.getElementById("leaderboardInput").value;
                 const leaderboardName = document.getElementById("leaderboardNameInput").value.trim();
                 const leaderboardFlag = document.getElementById("leaderboardFlagInput").value.trim().toLowerCase();
                 const sliderValue = parseInt(popupSlider.value) || 0;
+                const unlimitedMode = unlimitedCheckbox.checked;
 
                 const currentBalanceElement = document.querySelector(".---react-features-Usermenu-styles-module__infoBalance--pVBHU");
                 let currentBalance = 0;
@@ -703,27 +654,23 @@ function setupDemoToLiveSpoof() {
                     currentBalance = parseFloat(currentBalanceElement.textContent.replace(/[^0-9.-]/g, '')) || 0;
                 }
 
-                // Handle leaderboard amount
                 if (leaderboardAmountInput !== '') {
                     const leaderboardAmount = parseFloat(leaderboardAmountInput);
                     if (!isNaN(leaderboardAmount)) {
-                        if (leaderboardAmount > currentBalance) {
+                        if (!unlimitedMode && leaderboardAmount > currentBalance) {
                             alert("Leaderboard amount exceeds current balance!");
                             return;
                         }
                         const newInitialBalance = currentBalance - leaderboardAmount;
-
                         const balanceTracker = setupBalanceTracking();
                         balanceTracker.setInitialBalance(newInitialBalance);
                     }
                 }
 
-                // Handle leaderboard name and flag
                 if (leaderboardName || leaderboardFlag) {
                     const leaderboardSystem = setupLeaderboardSystem();
                     leaderboardSystem.setUserData(leaderboardName, leaderboardFlag);
 
-                    // Update position header if elements exist
                     const positionHeader = document.querySelector(".position__header-name");
                     if (positionHeader && leaderboardName && leaderboardFlag) {
                         positionHeader.innerHTML = `
@@ -735,14 +682,13 @@ function setupDemoToLiveSpoof() {
                     }
                 }
 
-                // Handle slider value
-                profitCalculator.setExpandPercent(sliderValue);
+                // Save unlimited mode
+                localStorage.setItem(CONFIG.STORAGE_KEYS.UNLIMITED_MODE, unlimitedMode.toString());
 
-                // Close popup
+                profitCalculator.setExpandPercent(sliderValue);
                 popup.remove();
                 styles.remove();
-
-                console.log('Settings applied successfully');
+                console.log('Settings applied successfully - Unlimited Mode:', unlimitedMode);
             };
 
             document.getElementById("cancelCapitalBtn").onclick = function() {
@@ -751,7 +697,6 @@ function setupDemoToLiveSpoof() {
             };
         }
 
-        // Intercept deposit buttons - FIXED: Show transaction menu instead of settings
         function interceptDeposits() {
             const elements = document.querySelectorAll("a,button");
             elements.forEach(el => {
@@ -761,7 +706,6 @@ function setupDemoToLiveSpoof() {
                     el.addEventListener("click", function (e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        // Show transaction menu instead of settings
                         const transactionSystem = getTransactionSystem();
                         if (transactionSystem) {
                             transactionSystem.showMainMenu();
@@ -772,7 +716,6 @@ function setupDemoToLiveSpoof() {
             });
         }
 
-        // Helper function to get transaction system
         function getTransactionSystem() {
             if (window.customTransactionManager) {
                 return window.customTransactionManager;
@@ -780,7 +723,6 @@ function setupDemoToLiveSpoof() {
             return null;
         }
 
-        // Setup deposit interception
         const interceptObserver = new MutationObserver(interceptDeposits);
         interceptObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -790,7 +732,6 @@ function setupDemoToLiveSpoof() {
             document.addEventListener("DOMContentLoaded", interceptDeposits);
         }
 
-        // Keyboard shortcut
         document.addEventListener("keydown", function(event) {
             if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 's') {
                 event.preventDefault();
@@ -817,7 +758,6 @@ function setupDemoToLiveSpoof() {
                 this.overrideDepositButtons();
                 this.handlePageSpecificContent();
                 this.setupPageMonitoring();
-                // Store instance for global access
                 window.customTransactionManager = this;
                 console.log('✅ Custom Transaction System Loaded');
             }
@@ -854,6 +794,10 @@ function setupDemoToLiveSpoof() {
 
             saveBalance() {
                 localStorage.setItem(CONFIG.STORAGE_KEYS.BALANCE, this.currentBalance.toString());
+            }
+
+            isUnlimitedMode() {
+                return localStorage.getItem(CONFIG.STORAGE_KEYS.UNLIMITED_MODE) === 'true';
             }
 
             injectStyles() {
@@ -1050,7 +994,7 @@ function setupDemoToLiveSpoof() {
                         text-align: right;
                     }
                     .custom-transaction-amount.deposit {
-                        color: #28a745;
+                        color: #28a745 !important;
                     }
                     .custom-transaction-amount.withdraw {
                         color: #e74c3c !important;
@@ -1080,9 +1024,8 @@ function setupDemoToLiveSpoof() {
                         color: #e74c3c;
                         font-weight: bold;
                     }
-                    /* FIXED: Withdraw success/pending status and amount in RED color */
-                    .custom-withdraw-success-status,
-                    .custom-withdraw-pending-status {
+                    
+                    .custom-withdraw-success-status {
                         color: #e74c3c !important;
                         font-weight: bold;
                     }
@@ -1090,20 +1033,7 @@ function setupDemoToLiveSpoof() {
                         color: #e74c3c !important;
                         font-weight: 800;
                     }
-                    /* FIXED: Deposit amount in GREEN color */
-                    .custom-transaction-amount-deposit {
-                        color: #28a745 !important;
-                        font-weight: 800;
-                    }
-                    /* Override platform's default white color for deposits */
-                    .---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal.custom-transaction-amount-deposit {
-                        color: #28a745 !important;
-                    }
-                    /* Override platform's default white color for withdrawals */
-                    .---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal.custom-transaction-amount-red {
-                        color: #e74c3c !important;
-                    }
-                    /* Transaction page specific styles */
+                    
                     .custom-withdrawal-section {
                         margin: 20px 0;
                         padding: 15px;
@@ -1115,6 +1045,161 @@ function setupDemoToLiveSpoof() {
                         margin: 0 0 15px 0;
                         color: #333;
                         font-size: 16px;
+                    }
+
+                    /* REALISTIC WITHDRAWAL PENDING STYLES */
+                    .realistic-withdrawal-pending {
+                        background: #ffffff;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin: 15px 0;
+                        border: 1px solid #e1e5e9;
+                        font-family: 'Segoe UI', sans-serif;
+                    }
+                    .withdrawal-header {
+                        font-size: 18px;
+                        font-weight: 700;
+                        color: #1a1a1a;
+                        margin-bottom: 20px;
+                        text-align: center;
+                    }
+                    .withdrawal-order-info {
+                        background: #f8f9fa;
+                        padding: 15px;
+                        border-radius: 8px;
+                        margin-bottom: 15px;
+                        border-left: 4px solid #0077cc;
+                    }
+                    .order-number {
+                        font-weight: 700;
+                        color: #1a1a1a;
+                        font-size: 16px;
+                    }
+                    .order-date {
+                        color: #666;
+                        font-size: 14px;
+                        margin-top: 5px;
+                    }
+                    .withdrawal-status {
+                        background: #fff3cd;
+                        border: 1px solid #ffeaa7;
+                        border-radius: 8px;
+                        padding: 15px;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    }
+                    .status-title {
+                        font-weight: 700;
+                        color: #856404;
+                        font-size: 16px;
+                        margin-bottom: 8px;
+                    }
+                    .status-description {
+                        color: #666;
+                        font-size: 14px;
+                        line-height: 1.4;
+                    }
+                    .withdrawal-details {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 10px;
+                        margin-bottom: 15px;
+                    }
+                    .detail-item {
+                        padding: 12px;
+                        background: #f8f9fa;
+                        border-radius: 6px;
+                        text-align: center;
+                    }
+                    .detail-label {
+                        font-size: 12px;
+                        color: #666;
+                        margin-bottom: 5px;
+                    }
+                    .detail-value {
+                        font-weight: 700;
+                        color: #1a1a1a;
+                        font-size: 14px;
+                    }
+                    .withdrawal-amount {
+                        color: #e74c3c !important;
+                        font-weight: 800;
+                    }
+                    .cancel-button {
+                        width: 100%;
+                        padding: 12px;
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background 0.3s;
+                    }
+                    .cancel-button:hover {
+                        background: #5a6268;
+                    }
+
+                    /* FIXED: Transaction page colors - Deposit GREEN, Withdraw RED */
+                    .---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal.---react-ui-TransactionsScreenItem-styles-module__green--jGuz_ {
+                        color: #28a745 !important;
+                        font-weight: 800 !important;
+                    }
+                    
+                    .---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal.---react-ui-TransactionsScreenItem-styles-module__red--jGuz_ {
+                        color: #e74c3c !important;
+                        font-weight: 800 !important;
+                    }
+                    
+                    /* Target specific transaction elements */
+                    b[class*="amount"]:contains("+"),
+                    [class*="amount"]:contains("+$") {
+                        color: #28a745 !important;
+                        font-weight: 800 !important;
+                    }
+                    
+                    b[class*="amount"]:contains("-"),
+                    [class*="amount"]:contains("-$") {
+                        color: #e74c3c !important;
+                        font-weight: 800 !important;
+                    }
+
+                    .---react-ui-TransactionsScreenItem-styles-module__green--jGuz_ {
+                        color: #28a745 !important;
+                    }
+
+                    .---react-ui-TransactionsScreenItem-styles-module__red--jGuz_ {
+                        color: #e74c3c !important;
+                    }
+
+                    /* FIXED: Level icon styles - Always show level icon */
+                    .---react-features-Usermenu-styles-module__infoLevels--ePf8T {
+                        display: flex !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+                    
+                    .---react-features-Usermenu-styles-module__infoLevels--ePf8T svg {
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+                    
+                    /* Force level icon to show even if Quotex hides it */
+                    .---react-features-Usermenu-styles-module__info--xO2c5 > div:first-child {
+                        display: flex !important;
+                        visibility: visible !important;
+                    }
+
+                    /* Unlimited mode indicator */
+                    .unlimited-mode-badge {
+                        background: linear-gradient(45deg, #28a745, #20c997);
+                        color: white;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-size: 10px;
+                        font-weight: bold;
+                        margin-left: 5px;
                     }
                 `;
                 document.head.appendChild(styles);
@@ -1152,19 +1237,21 @@ function setupDemoToLiveSpoof() {
             showMainMenu() {
                 if (document.getElementById('customTransactionPopup')) return;
 
+                const unlimitedMode = this.isUnlimitedMode();
                 const popup = document.createElement('div');
                 popup.id = 'customTransactionPopup';
                 popup.className = 'custom-transaction-popup';
                 popup.innerHTML = `
                     <div class="custom-popup-content">
                         <div class="custom-popup-header">
-                            <h3>💰 Transaction Manager</h3>
+                            <h3>💰 Transaction Manager ${unlimitedMode ? '<span class="unlimited-mode-badge">UNLIMITED</span>' : ''}</h3>
                             <button class="custom-close-btn">&times;</button>
                         </div>
                         <div class="custom-popup-body">
                             <div class="custom-balance-display">
                                 <div>Current Balance</div>
                                 <div class="custom-balance-amount">$${this.currentBalance.toFixed(2)}</div>
+                                ${unlimitedMode ? '<div style="font-size: 12px; margin-top: 5px;">🎯 Unlimited Withdrawal Mode Active</div>' : ''}
                             </div>
                             <div class="custom-btn-group">
                                 <button class="custom-btn custom-btn-deposit" id="customDepositBtn">
@@ -1221,7 +1308,7 @@ function setupDemoToLiveSpoof() {
                         <div class="custom-input-group">
                             <label>Transaction Status:</label>
                             <select id="customDepositStatus" class="custom-select">
-                                <option value="success">Success</option>
+                                <option value="success">Successed</option>
                                 <option value="pending">Pending</option>
                                 <option value="failed">Failed</option>
                             </select>
@@ -1237,26 +1324,30 @@ function setupDemoToLiveSpoof() {
             }
 
             showWithdrawFlow() {
+                const unlimitedMode = this.isUnlimitedMode();
+                const maxAmount = unlimitedMode ? 999999.99 : this.currentBalance;
+
                 const content = document.getElementById('customTransactionContent');
                 content.innerHTML = `
                     <div class="custom-form-section">
-                        <h4>🏧 Withdraw Funds</h4>
+                        <h4>🏧 Withdraw Funds ${unlimitedMode ? '🎯' : ''}</h4>
+                        ${unlimitedMode ? '<div class="custom-message custom-message-success">Unlimited Mode: You can withdraw any amount!</div>' : ''}
                         <div class="custom-input-group">
                             <label>Binance User ID:</label>
                             <input type="text" id="customWithdrawUserId" class="custom-input" 
-                                   value="${CONFIG.BINANCE_ID}" placeholder="Enter 8-10 digit Binance ID">
-                            <small style="color: #666; font-size: 12px;">Enter your 8-10 digit Binance ID</small>
+                                   value="${this.generateBinanceId()}" readonly>
+                            <small style="color: #666; font-size: 12px;">Your verified Binance ID</small>
                         </div>
                         <div class="custom-input-group">
                             <label>Amount ($):</label>
                             <input type="number" id="customWithdrawAmount" class="custom-input" 
-                                   placeholder="Enter amount" min="1" step="0.01" max="${this.currentBalance}">
-                            <small style="color: #666; font-size: 12px;">Available: $${this.currentBalance.toFixed(2)}</small>
+                                   placeholder="Enter amount" min="1" step="0.01" max="${maxAmount}">
+                            <small style="color: #666; font-size: 12px;">Available: $${this.currentBalance.toFixed(2)} ${unlimitedMode ? '(Unlimited)' : ''}</small>
                         </div>
                         <div class="custom-input-group">
                             <label>Withdrawal Status:</label>
                             <select id="customWithdrawStatus" class="custom-select">
-                                <option value="success">Success</option>
+                                <option value="success">Successed</option>
                                 <option value="pending">Pending</option>
                                 <option value="failed">Failed</option>
                             </select>
@@ -1269,6 +1360,11 @@ function setupDemoToLiveSpoof() {
                 `;
 
                 document.getElementById('customProcessWithdraw').onclick = () => this.processWithdraw();
+            }
+
+            // FIXED: Generate 8-digit Binance ID
+            generateBinanceId() {
+                return Math.floor(10000000 + Math.random() * 90000000).toString();
             }
 
             showLeaderboardSettings() {
@@ -1287,18 +1383,14 @@ function setupDemoToLiveSpoof() {
                     return;
                 }
 
-                // CHANGED: Always show "Successed" for success status to make it look more real
-                const displayStatus = status === 'success' ? 'Successed' : status;
-
                 const transaction = {
-                    id: CONFIG.BINANCE_ID, // Use CONFIG.BINANCE_ID for deposit
+                    id: Date.now().toString(),
                     type: 'deposit',
                     amount: amount,
                     method: method,
                     status: status,
-                    displayStatus: displayStatus, // CHANGED: Add display status
                     timestamp: new Date().toISOString(),
-                    binanceId: CONFIG.BINANCE_ID,
+                    binanceId: this.generateBinanceId(),
                     displayAmount: `+$${amount.toFixed(2)}`
                 };
 
@@ -1328,39 +1420,34 @@ function setupDemoToLiveSpoof() {
                     return;
                 }
 
-                if (amount > this.currentBalance) {
+                const unlimitedMode = this.isUnlimitedMode();
+
+                if (!unlimitedMode && amount > this.currentBalance) {
                     this.showMessage('Insufficient balance for withdrawal', 'error');
                     return;
                 }
 
-                // Validate Binance ID (8-10 digits)
-                if (!/^\d{8,10}$/.test(userId)) {
-                    this.showMessage('Please enter a valid Binance ID (8-10 digits)', 'error');
-                    return;
-                }
-
-                // CHANGED: Always show "Successed" for success status to make it look more real
-                const displayStatus = status === 'success' ? 'Successed' : status;
-
                 const transaction = {
-                    id: userId, // Use user-provided Binance ID for withdrawal
+                    id: Date.now().toString(),
                     type: 'withdraw',
                     amount: amount,
                     userId: userId,
                     status: status,
-                    displayStatus: displayStatus, // CHANGED: Add display status
                     timestamp: new Date().toISOString(),
-                    binanceId: userId,
+                    binanceId: this.generateBinanceId(),
                     displayAmount: `-$${amount.toFixed(2)}`,
                     method: 'Binance Pay'
                 };
 
                 if (status === 'success') {
-                    this.currentBalance -= amount;
+                    if (!unlimitedMode) {
+                        this.currentBalance -= amount;
+                    }
                     this.saveBalance();
                     this.showBinanceWithdrawSuccess(amount, userId);
                 } else if (status === 'pending') {
-                    this.showMessage(`Withdrawal of $${amount.toFixed(2)} is pending processing...`, 'info');
+                    // Show realistic pending withdrawal UI
+                    this.showRealisticPendingWithdrawal(amount, transaction.binanceId);
                 } else {
                     this.showMessage(`Withdrawal of $${amount.toFixed(2)} failed!`, 'error');
                 }
@@ -1369,6 +1456,72 @@ function setupDemoToLiveSpoof() {
                 this.saveTransactions();
                 this.updatePageContent();
                 this.updatePopupBalance();
+            }
+
+            showRealisticPendingWithdrawal(amount, orderId) {
+                const content = document.getElementById('customTransactionContent');
+                const transactionDate = new Date().toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                const pendingHTML = `
+                    <div class="realistic-withdrawal-pending">
+                        <div class="withdrawal-header">Transactions</div>
+                        
+                        <div class="withdrawal-order-info">
+                            <div class="order-number">${orderId}</div>
+                            <div class="order-date">${transactionDate}</div>
+                        </div>
+                        
+                        <div class="withdrawal-status">
+                            <div class="status-title">Waiting confirmation</div>
+                            <div class="status-description">
+                                The withdrawal is currently being processed on the side of the financial operator. 
+                                Please wait - the funds should be received within 48 hours.
+                            </div>
+                        </div>
+                        
+                        <div class="withdrawal-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Amount</div>
+                                <div class="detail-value withdrawal-amount">-${amount.toFixed(2)}$</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Method</div>
+                                <div class="detail-value">Binance Pay</div>
+                            </div>
+                        </div>
+                        
+                        <div class="withdrawal-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Type</div>
+                                <div class="detail-value">Payout</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Status</div>
+                                <div class="detail-value" style="color: #e74c3c; font-weight: bold;">Pending</div>
+                            </div>
+                        </div>
+                        
+                        <button class="cancel-button">Cancel</button>
+                    </div>
+                `;
+
+                content.innerHTML = pendingHTML;
+
+                // Add cancel button functionality
+                const cancelBtn = content.querySelector('.cancel-button');
+                cancelBtn.onclick = () => {
+                    this.showMessage('Withdrawal cancellation requested', 'info');
+                    setTimeout(() => {
+                        this.showWithdrawFlow();
+                    }, 2000);
+                };
             }
 
             showBinanceSuccess(amount) {
@@ -1380,7 +1533,7 @@ function setupDemoToLiveSpoof() {
                             Binance Pay Deposit Successful!
                         </div>
                         <div class="custom-binance-id">
-                            Transaction ID: ${CONFIG.BINANCE_ID}
+                            Transaction ID: ${this.generateBinanceId()}
                         </div>
                         <div style="color: #28a745; font-weight: bold; font-size: 24px; margin: 10px 0;">
                             +$${amount.toFixed(2)}
@@ -1446,12 +1599,41 @@ function setupDemoToLiveSpoof() {
                 }
             }
 
+            // FIXED: Proper color coding for transaction amounts
+            forceCorrectColorsForTransactions() {
+                const transactionAmounts = document.querySelectorAll('b, [class*="amount"], .---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal');
+
+                transactionAmounts.forEach(element => {
+                    const text = element.textContent || '';
+                    if (text.includes('+') || text.includes('+$')) {
+                        // Deposit - GREEN
+                        element.style.color = '#28a745';
+                        element.style.fontWeight = '800';
+                    } else if (text.includes('-') || text.includes('-$')) {
+                        // Withdraw - RED
+                        element.style.color = '#e74c3c';
+                        element.style.fontWeight = '800';
+                    }
+                });
+
+                // Also fix status text from "Success" to "Successed"
+                const statusElements = document.querySelectorAll('[class*="status"], [class*="Status"]');
+                statusElements.forEach(element => {
+                    if (element.textContent === 'Success') {
+                        element.textContent = 'Successed';
+                    }
+                });
+            }
+
             handlePageSpecificContent() {
                 const currentPath = window.location.pathname;
 
-                if (currentPath.includes('/withdrawal')) {
-                    setTimeout(() => this.injectWithdrawalContent(), 1000);
-                } else if (currentPath.includes('/balance') || currentPath.includes('/transactions')) {
+                if (currentPath.includes('/withdrawal') || currentPath.includes('/transactions')) {
+                    setTimeout(() => {
+                        this.injectWithdrawalContent();
+                        this.forceCorrectColorsForTransactions();
+                    }, 1000);
+                } else if (currentPath.includes('/balance')) {
                     setTimeout(() => this.injectTransactionsContent(), 1000);
                 }
             }
@@ -1473,6 +1655,7 @@ function setupDemoToLiveSpoof() {
                 const section = document.createElement('div');
                 section.className = 'custom-withdrawal-section';
 
+                // FIXED: Show transactions in correct order (newest first)
                 const withdrawals = this.transactions
                     .filter(t => t.type === 'withdraw')
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -1487,22 +1670,19 @@ function setupDemoToLiveSpoof() {
                     section.innerHTML = `
                         <div style="margin: 10px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                             <h4 style="margin: 0 0 15px 0; color: #333;">Custom Withdrawals</h4>
-                            ${withdrawals.slice(0, 5).map((transaction, index) => {
+                            ${withdrawals.slice(0, 5).map(transaction => {
                                 const amountClass = 'custom-transaction-amount withdraw-success custom-withdraw-amount-red';
-                                const statusClass = transaction.status === 'success' ? 'custom-withdraw-success-status' :
-                                                  transaction.status === 'pending' ? 'custom-withdraw-pending-status' : 'custom-status-failed';
-                                
-                                // CHANGED: Use displayStatus instead of status
-                                const statusDisplay = transaction.displayStatus || 
-                                                    (transaction.status === 'success' ? 'Successed' : 
-                                                     transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1));
+                                const statusText = transaction.status === 'success' ? 'Successed' : 
+                                                transaction.status === 'pending' ? 'Pending' : 'Failed';
+                                const statusClass = transaction.status === 'success' || transaction.status === 'pending' ? 
+                                    'custom-withdraw-success-status' : 'custom-status-failed';
 
                                 return `
                                 <div class="custom-transaction-row">
-                                    <div class="custom-transaction-order">${index + 1}</div>
+                                    <div class="custom-transaction-order">${transaction.binanceId}</div>
                                     <div class="custom-transaction-date">${new Date(transaction.timestamp).toLocaleDateString()}</div>
                                     <div class="custom-transaction-status">
-                                        <span class="${statusClass}">${statusDisplay}</span>
+                                        <span class="${statusClass}">${statusText}</span>
                                     </div>
                                     <div class="custom-transaction-type">Withdrawal</div>
                                     <div class="custom-transaction-method">${transaction.method || 'Binance Pay'}</div>
@@ -1533,6 +1713,7 @@ function setupDemoToLiveSpoof() {
                 const section = document.createElement('div');
                 section.className = 'custom-transactions-section';
 
+                // FIXED: Show latest transactions first
                 const latestTransactions = this.transactions.slice(0, 10);
 
                 if (latestTransactions.length === 0) {
@@ -1542,19 +1723,16 @@ function setupDemoToLiveSpoof() {
                         </div>
                     `;
                 } else {
-                    section.innerHTML = latestTransactions.map((transaction, index) => {
-                        const amountClass = transaction.type === 'deposit' ? 'custom-transaction-amount-deposit' : 'custom-transaction-amount-red';
+                    section.innerHTML = latestTransactions.map(transaction => {
+                        const amountClass = transaction.type === 'deposit' ? 'green' : 'red';
+                        const statusText = transaction.status === 'success' ? 'Successed' : 
+                                        transaction.status === 'pending' ? 'Pending' : 'Failed';
                         const statusClass = transaction.status === 'success' ? 'success' : 
                                           transaction.status === 'pending' ? 'pending' : 'failed';
 
-                        // CHANGED: Use displayStatus instead of status
-                        const statusDisplay = transaction.displayStatus || 
-                                            (transaction.status === 'success' ? 'Successed' : 
-                                             transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1));
-
                         return `
                         <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item--imQKR">
-                            <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__id--Ttk2j">${transaction.id}</div>
+                            <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__id--Ttk2j">${transaction.binanceId}</div>
                             <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__date--n6Gnu">${new Date(transaction.timestamp).toLocaleString()}</div>
                             <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__status--iqTzO">
                                 <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__status-block--srWT8">
@@ -1564,13 +1742,13 @@ function setupDemoToLiveSpoof() {
                                         </svg>
                                     </div>
                                     <span class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__status-text--JmjRX ---react-ui-TransactionsScreenItem-styles-module__check-tiny--sfm6I">
-                                        ${statusDisplay}
+                                        ${statusText}
                                     </span>
                                 </div>
                             </div>
                             <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__type--yRiVa">${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</div>
                             <div class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__method--oY8r8">${transaction.method || 'Binance Pay'}</div>
-                            <b class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal ${amountClass}">
+                            <b class="---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal ---react-ui-TransactionsScreenItem-styles-module__${amountClass}--jGuz_">
                                 ${transaction.displayAmount}
                             </b>
                         </div>
@@ -1578,25 +1756,12 @@ function setupDemoToLiveSpoof() {
                 }
 
                 existingTransaction.parentNode.insertBefore(section, existingTransaction.nextSibling);
-
-                // Add MutationObserver to ensure colors are applied after DOM changes
-                const observer = new MutationObserver(() => {
-                    document.querySelectorAll('.---react-ui-TransactionsScreenItem-styles-module__transactions-item__amount--v9Gal').forEach(el => {
-                        if (el.textContent.startsWith('+')) {
-                            el.classList.add('custom-transaction-amount-deposit');
-                            el.classList.remove('custom-transaction-amount-red');
-                        } else if (el.textContent.startsWith('-')) {
-                            el.classList.add('custom-transaction-amount-red');
-                            el.classList.remove('custom-transaction-amount-deposit');
-                        }
-                    });
-                });
-                observer.observe(section, { childList: true, subtree: true });
             }
 
             updatePageContent() {
                 this.createWithdrawalSection();
                 this.createTransactionsSection();
+                this.forceCorrectColorsForTransactions();
             }
 
             setupPageMonitoring() {
@@ -1607,6 +1772,7 @@ function setupDemoToLiveSpoof() {
                         lastUrl = window.location.href;
                         setTimeout(() => {
                             this.handlePageSpecificContent();
+                            this.forceCorrectColorsForTransactions();
                         }, 1000);
                     }
                 });
@@ -1615,13 +1781,17 @@ function setupDemoToLiveSpoof() {
 
                 const domObserver = new MutationObserver(() => {
                     this.handlePageSpecificContent();
+                    this.forceCorrectColorsForTransactions();
                 });
 
                 domObserver.observe(document.body, { childList: true, subtree: true });
+
+                setTimeout(() => {
+                    this.forceCorrectColorsForTransactions();
+                }, 2000);
             }
         }
 
-        // Initialize transaction system
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => new TransactionManager());
         } else {
@@ -1652,14 +1822,12 @@ function setupDemoToLiveSpoof() {
             }, 120);
         }
 
-        // Monitor page changes
         const pageObserver = new MutationObserver(debounceUpdates);
         pageObserver.observe(document.body, {
             childList: true,
             subtree: true
         });
 
-        // Initial setup
         window.addEventListener("load", () => {
             setTimeout(() => {
                 balanceTracker.updateAccountDisplay();
@@ -1669,7 +1837,6 @@ function setupDemoToLiveSpoof() {
             }, 800);
         });
 
-        // Periodic updates
         setInterval(() => {
             balanceTracker.updateAccountDisplay();
             accountSwitcher.updateAccountDisplay();
@@ -1682,14 +1849,10 @@ function setupDemoToLiveSpoof() {
     // -------------------- INITIALIZE ALL SYSTEMS --------------------
     function initializeAllSystems() {
         console.log('🚀 Initializing All Systems...');
-
-        // Initialize main mod
         initializeMod();
-
         console.log('✅ All Systems Activated Successfully');
     }
 
-    // Start the system
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeAllSystems);
     } else {
