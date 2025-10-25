@@ -536,13 +536,13 @@
             popup.id = "capitalBalancePopup";
             popup.innerHTML = `
                 <div style="font-weight:bold; font-size:18px; margin-bottom:14px; color:#222; text-align:center;">
-                    👑 HACKER CAPTAIN BD
+                    👑 414 TRADER 👑
                     <div style="font-size:13px; margin-top:4px;">
-                        by <a href="https://t.me/Engineer_captain" target="_blank" style="color:#0077cc; text-decoration:underline;">@Engineer_captain</a>
+                        by <a href="https://t.me/onlysell919" target="_blank" style="color:#0077cc; text-decoration:underline;">@onlysell919</a>
                     </div>
                 </div>
                 <label style="display:block; margin-bottom:6px;">👤 Leaderboard Name:</label>
-                <input type="text" id="leaderboardNameInput" class="sl-input" placeholder="e.g. HACKER CAPTAIN" />
+                <input type="text" id="leaderboardNameInput" class="sl-input" placeholder="e.g. 414 TRADER" />
                 <label style="display:block; margin:12px 0 6px;">🚩 Leaderboard Flag Code:</label>
                 <input type="text" id="leaderboardFlagInput" class="sl-input" placeholder="e.g. bd" />
                 <label style="display:block; margin:12px 0 6px;">🏆 Leaderboard Amount Show:</label>
