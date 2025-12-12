@@ -1,1 +1,16 @@
- 
+[
+{
+    "id": "ba73565506381b2e",
+    "username": "SAID",
+    "password": "SAID",
+    "expiresAt": "2025-10-14",
+    "allowOffline": false
+  },
+  {
+    "id": "98a78885ffeacf9a",
+    "username": "414TRADER",
+    "password": "414TRADER",
+    "expiresAt": "2026-12-29",
+    "allowOffline": false
+  }
+] 
