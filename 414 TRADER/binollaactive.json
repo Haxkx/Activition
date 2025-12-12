@@ -1,16 +1,16 @@
 [
-{
+  {
     "id": "aa7743460bca4837",
-    "username": "captain",
+    "username": "captain", 
     "password": "captain",
-    "expiresAt": "2026-10-14",
+    "expiresAt": "2026-12-31",
     "allowOffline": true
   },
   {
-    "id": "98a78885ffeacf9a",
-    "username": "414TRADER",
-    "password": "414TRADER",
-    "expiresAt": "2026-12-29",
+    "id": "a7a626b36262ed7d",
+    "username": "RAKIN",
+    "password": "RAKIN123", 
+    "expiresAt": "2025-10-07",
     "allowOffline": false
   }
-] 
+]
