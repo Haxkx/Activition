@@ -7,6 +7,13 @@
     "allowOffline": true
   },
   {
+    "id": "4d6cf78226998191",
+    "username": "ASIYA", 
+    "password": "ASIYA",
+    "expiresAt": "2026-12-31",
+    "allowOffline": false
+  },
+  {
     "id": "a7a626b36262ed7d",
     "username": "RAKIN",
     "password": "RAKIN123", 
